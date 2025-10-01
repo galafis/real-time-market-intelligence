@@ -1,5 +1,7 @@
 # 🇧🇷 Plataforma de Inteligência de Mercado em Tempo Real
 
+![Imagem Hero da Plataforma de Inteligência de Mercado em Tempo Real](./hero_image.png)
+
 [![Status do Projeto](https://img.shields.io/badge/Status-Ativo-brightgreen)](https://github.com/galafis/real-time-market-intelligence)
 [![Licença](https://img.shields.io/badge/Licença-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
@@ -138,7 +140,7 @@ client.subscribe_to_assets(["AAPL", "MSFT", "GOOGL"], callback=process_update)
 
 # Função de callback para processar atualizações
 def process_update(update):
-    print(f"Ativo: {update['symbol']}, Preço: {update['price']}, Variação: {update['change_percent']}%")
+    print(f"Ativo: {update["symbol"]}, Preço: {update["price"]}, Variação: {update["change_percent"]}% ")
 ```
 
 ### Análise de Sentimento de Mercado
@@ -147,9 +149,9 @@ def process_update(update):
 # Analisar sentimento de mercado para um ativo
 sentiment = client.get_market_sentiment("AAPL")
 
-print(f"Sentimento: {sentiment['score']}")
-print(f"Fontes positivas: {sentiment['positive_sources']}")
-print(f"Fontes negativas: {sentiment['negative_sources']}")
+print(f"Sentimento: {sentiment["score"]}")
+print(f"Fontes positivas: {sentiment["positive_sources"]}")
+print(f"Fontes negativas: {sentiment["negative_sources"]}")
 ```
 
 ### Previsão de Tendências
@@ -159,7 +161,7 @@ print(f"Fontes negativas: {sentiment['negative_sources']}")
 forecast = client.get_price_forecast("AAPL", days=7)
 
 for date, prediction in forecast.items():
-    print(f"Data: {date}, Preço previsto: {prediction['price']}, Intervalo de confiança: {prediction['confidence_interval']}")
+    print(f"Data: {date}, Preço previsto: {prediction["price"]}, Intervalo de confiança: {prediction["confidence_interval"]}")
 ```
 
 ## 📁 Estrutura do Projeto
@@ -229,6 +231,8 @@ Contribuições são bem-vindas! Por favor, sinta-se à vontade para enviar um P
 
 # 🇬🇧 Real-Time Market Intelligence Platform
 
+![Hero Image for Real-Time Market Intelligence Platform](./hero_image.png)
+
 [![Project Status](https://img.shields.io/badge/Status-Active-brightgreen)](https://github.com/galafis/real-time-market-intelligence)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
@@ -259,7 +263,7 @@ The **Real-Time Market Intelligence Platform** is an enterprise-grade system for
 - **FastAPI**: High-performance RESTful API
 - **Redis**: Cache and pub/sub for real-time data
 - **Pandas & NumPy**: Data manipulation and analysis
-- **scikit-learn & TensorFlow**: Machine learning and deep learning models
+- **scikit-learn & TensorFlow**: Machine learning and deep learning
 
 ### Frontend
 - **React 18**: JavaScript library for building interfaces
@@ -272,7 +276,7 @@ The **Real-Time Market Intelligence Platform** is an enterprise-grade system for
 ### DevOps
 - **Docker & Docker Compose**: Containerization and orchestration
 - **Kubernetes**: Container orchestration for production
-- **Prometheus & Grafana**: Monitoring and alerts
+- **Prometheus & Grafana**: Monitoramento e alertas
 - **GitHub Actions**: Automated CI/CD
 
 ## 🏗️ Architecture
@@ -367,7 +371,7 @@ client.subscribe_to_assets(["AAPL", "MSFT", "GOOGL"], callback=process_update)
 
 # Callback function to process updates
 def process_update(update):
-    print(f"Asset: {update['symbol']}, Price: {update['price']}, Change: {update['change_percent']}%")
+    print(f"Asset: {update["symbol"]}, Price: {update["price"]}, Change: {update["change_percent"]}% ")
 ```
 
 ### Market Sentiment Analysis
@@ -376,9 +380,9 @@ def process_update(update):
 # Analyze market sentiment for an asset
 sentiment = client.get_market_sentiment("AAPL")
 
-print(f"Sentiment: {sentiment['score']}")
-print(f"Positive sources: {sentiment['positive_sources']}")
-print(f"Negative sources: {sentiment['negative_sources']}")
+print(f"Sentiment: {sentiment["score"]}")
+print(f"Positive sources: {sentiment["positive_sources"]}")
+print(f"Negative sources: {sentiment["negative_sources"]}")
 ```
 
 ### Trend Forecasting
@@ -388,7 +392,7 @@ print(f"Negative sources: {sentiment['negative_sources']}")
 forecast = client.get_price_forecast("AAPL", days=7)
 
 for date, prediction in forecast.items():
-    print(f"Date: {date}, Predicted price: {prediction['price']}, Confidence interval: {prediction['confidence_interval']}")
+    print(f"Date: {date}, Predicted price: {prediction["price"]}, Confidence interval: {prediction["confidence_interval"]}")
 ```
 
 ## 📁 Project Structure
@@ -417,7 +421,7 @@ real-time-market-intelligence/
 2. **Portfolio Analysis**: Monitoring and analysis of investment portfolio performance
 3. **Anomaly Detection**: Identification of abnormal market movements and opportunities
 4. **Sentiment Analysis**: Correlation between news, social media, and market movements
-5. **Strategy Backtesting**: Testing investment strategies with historical data
+5. **Backtesting de Estratégias**: Testing investment strategies with historical data
 
 ## 🔧 Development
 
@@ -453,4 +457,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Contributions
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
 
