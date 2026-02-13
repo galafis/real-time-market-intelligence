@@ -13,6 +13,21 @@ Este projeto reúne módulos Python para coleta, análise e visualização de da
 - **Dashboard Plotly Dash** — painel interativo para visualização de preços, sentimento e previsões.
 - **Cliente Python** — biblioteca cliente com suporte a REST e WebSocket para integração.
 
+## Arquitetura
+
+```mermaid
+graph TD
+    EXT["Dados Externos / Mock"] --> KP["kafka_producer.py"]
+    KP --> KC["kafka_consumer.py"]
+    KC --> DB["ClickHouse<br/>(initialize_db.py)"]
+    DB --> API["MarketAPI - FastAPI<br/>(market_api.py)"]
+    API --> AUTH["Autenticacao JWT"]
+    API --> SA["sentiment_analyzer.py<br/>VADER + FinBERT"]
+    API --> TSF["time_series_forecaster.py<br/>LSTM + Prophet"]
+    API --> CLIENT["client.py<br/>REST + WebSocket"]
+    API --> DASH["dashboard.py<br/>Plotly Dash"]
+```
+
 ## Estrutura do Projeto
 
 ```
@@ -124,6 +139,21 @@ This project brings together Python modules for collecting, analyzing, and visua
 - **Kafka Streaming** — producer and consumer using `confluent-kafka` for real-time data ingestion.
 - **Plotly Dash Dashboard** — interactive panel for price, sentiment, and forecast visualization.
 - **Python Client** — client library with REST and WebSocket support for integration.
+
+## Architecture
+
+```mermaid
+graph TD
+    EXT["External Data / Mock"] --> KP["kafka_producer.py"]
+    KP --> KC["kafka_consumer.py"]
+    KC --> DB["ClickHouse<br/>(initialize_db.py)"]
+    DB --> API["MarketAPI - FastAPI<br/>(market_api.py)"]
+    API --> AUTH["JWT Auth"]
+    API --> SA["sentiment_analyzer.py<br/>VADER + FinBERT"]
+    API --> TSF["time_series_forecaster.py<br/>LSTM + Prophet"]
+    API --> CLIENT["client.py<br/>REST + WebSocket"]
+    API --> DASH["dashboard.py<br/>Plotly Dash"]
+```
 
 ## Project Structure
 
