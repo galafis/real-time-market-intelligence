@@ -1,3 +1,7 @@
+# Infrastructure services for the Real-Time Market Intelligence Platform.
+# These provide the external dependencies (database, messaging, cache, monitoring)
+# needed by the Python application code in src/.
+
 version: '3.8'
 
 services:
@@ -16,7 +20,6 @@ services:
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-changeme}
     volumes:
       - clickhouse_data:/var/lib/clickhouse
-      - ./docker/clickhouse/init:/docker-entrypoint-initdb.d
     networks:
       - market-intelligence
     healthcheck:
@@ -77,154 +80,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # ==========================================
-  # Backend API Service
-  # ==========================================
-  api:
-    build:
-      context: .
-      dockerfile: docker/api/Dockerfile
-    container_name: market-intelligence-api
-    depends_on:
-      clickhouse:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    ports:
-      - "${API_PORT:-8000}:8000"
-      - "${WS_PORT:-8001}:8001"
-    environment:
-      - APP_ENV=${APP_ENV:-development}
-      - DEBUG=${DEBUG:-True}
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT:-9000}
-      - CLICKHOUSE_DATABASE=${CLICKHOUSE_DATABASE:-market_intelligence}
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
-      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
-    volumes:
-      - ./src:/app/src
-      - ./models:/app/models
-      - ./logs:/app/logs
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
-  # ==========================================
-  # Data Ingestion Service
-  # ==========================================
-  ingestion:
-    build:
-      context: .
-      dockerfile: docker/ingestion/Dockerfile
-    container_name: market-intelligence-ingestion
-    depends_on:
-      kafka:
-        condition: service_healthy
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY}
-      - YAHOO_FINANCE_API_KEY=${YAHOO_FINANCE_API_KEY}
-      - DATA_FETCH_INTERVAL=${DATA_FETCH_INTERVAL:-60}
-    volumes:
-      - ./src:/app/src
-      - ./logs:/app/logs
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
-  # ==========================================
-  # Stream Processing Service
-  # ==========================================
-  stream-processor:
-    build:
-      context: .
-      dockerfile: docker/stream-processor/Dockerfile
-    container_name: market-intelligence-stream-processor
-    depends_on:
-      kafka:
-        condition: service_healthy
-      clickhouse:
-        condition: service_healthy
-    environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
-      - CLICKHOUSE_HOST=clickhouse
-      - CLICKHOUSE_PORT=${CLICKHOUSE_PORT:-9000}
-      - ENABLE_SENTIMENT_ANALYSIS=${ENABLE_SENTIMENT_ANALYSIS:-True}
-      - ENABLE_PRICE_PREDICTION=${ENABLE_PRICE_PREDICTION:-True}
-      - ENABLE_ANOMALY_DETECTION=${ENABLE_ANOMALY_DETECTION:-True}
-    volumes:
-      - ./src:/app/src
-      - ./models:/app/models
-      - ./logs:/app/logs
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
-  # ==========================================
-  # Frontend Dashboard
-  # ==========================================
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: market-intelligence-frontend
-    depends_on:
-      - api
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:${API_PORT:-8000}
-      - REACT_APP_WS_URL=ws://localhost:${WS_PORT:-8001}
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
-  # ==========================================
-  # Prometheus Monitoring
-  # ==========================================
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: market-intelligence-prometheus
-    ports:
-      - "${PROMETHEUS_PORT:-9090}:9090"
-    volumes:
-      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
-  # ==========================================
-  # Grafana Dashboards
-  # ==========================================
-  grafana:
-    image: grafana/grafana:latest
-    container_name: market-intelligence-grafana
-    depends_on:
-      - prometheus
-    ports:
-      - "${GRAFANA_PORT:-3001}:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
-    volumes:
-      - ./docker/grafana/provisioning:/etc/grafana/provisioning
-      - grafana_data:/var/lib/grafana
-    networks:
-      - market-intelligence
-    restart: unless-stopped
-
 networks:
   market-intelligence:
     driver: bridge
@@ -232,5 +87,3 @@ networks:
 volumes:
   clickhouse_data:
   redis_data:
-  prometheus_data:
-  grafana_data:

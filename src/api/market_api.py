@@ -9,25 +9,18 @@ Date: June 2025
 """
 
 import os
-import json
-import logging
-from typing import Dict, List, Optional, Any, Union, Tuple
-from datetime import datetime, timedelta
-import asyncio
-import time
+from typing import Dict, List, Optional, Any
+from datetime import datetime, timedelta, timezone
 
-import pandas as pd
 import numpy as np
 from fastapi import FastAPI, HTTPException, Depends, Query, Path, Body, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 import jwt
 from passlib.context import CryptContext
 
 from ..utils.logger import get_logger
-from ..models.sentiment_analyzer import MarketSentimentAnalyzer
 
 logger = get_logger(__name__)
 
@@ -123,7 +116,7 @@ class MarketAPI:
         self.port = port
         
         # Security settings
-        self.secret_key = secret_key
+        self.secret_key = os.environ.get("JWT_SECRET_KEY", secret_key)
         self.algorithm = algorithm
         self.access_token_expire_minutes = access_token_expire_minutes
         
@@ -133,20 +126,22 @@ class MarketAPI:
         # OAuth2 scheme
         self.oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
         
-        # Mock users database
+        # Mock users database (passwords from env vars or defaults for dev)
+        admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
+        user_password = os.environ.get("USER_PASSWORD", "user")
         self.users_db = {
             "admin": {
                 "username": "admin",
                 "full_name": "Administrator",
                 "email": "admin@example.com",
-                "hashed_password": self.get_password_hash("admin"),
+                "hashed_password": self.get_password_hash(admin_password),
                 "disabled": False
             },
             "user": {
                 "username": "user",
                 "full_name": "Test User",
                 "email": "user@example.com",
-                "hashed_password": self.get_password_hash("user"),
+                "hashed_password": self.get_password_hash(user_password),
                 "disabled": False
             }
         }
@@ -159,16 +154,18 @@ class MarketAPI:
         )
         
         # Add CORS middleware
+        # NOTE: In production, restrict allow_origins to specific domains
+        allowed_origins = os.environ.get("CORS_ORIGINS", "*").split(",")
         self.app.add_middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=allowed_origins,
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"]
         )
         
-        # Initialize sentiment analyzer
-        self.sentiment_analyzer = MarketSentimentAnalyzer()
+        # Lazy-initialize sentiment analyzer (heavy imports: transformers, torch, nltk)
+        self.sentiment_analyzer = None
         
         # Set up routes
         self._setup_routes()
@@ -294,6 +291,9 @@ class MarketAPI:
             current_user: User = Depends(self.get_current_user)
         ):
             try:
+                if self.sentiment_analyzer is None:
+                    from ..models.sentiment_analyzer import MarketSentimentAnalyzer
+                    self.sentiment_analyzer = MarketSentimentAnalyzer()
                 result = self.sentiment_analyzer.analyze_market_sentiment(text)
                 return result
             except Exception as e:
@@ -384,16 +384,16 @@ class MarketAPI:
         to_encode = data.copy()
         
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now(timezone.utc) + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=15)
+            expire = datetime.now(timezone.utc) + timedelta(minutes=15)
         
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
         
         return encoded_jwt
     
-    async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> User:
+    async def get_current_user(self, token: str = Depends(OAuth2PasswordBearer(tokenUrl="token"))) -> User:
         """
         Get current user from token.
         
@@ -418,7 +418,7 @@ class MarketAPI:
             if username is None:
                 raise credentials_exception
             token_data = TokenData(username=username, exp=payload.get("exp"))
-        except jwt.PyJWTError:
+        except jwt.InvalidTokenError:
             raise credentials_exception
         
         user = self.get_user(username=token_data.username)
@@ -427,7 +427,7 @@ class MarketAPI:
         
         return user
     
-    async def get_current_active_user(self, current_user: User = Depends(get_current_user)) -> User:
+    async def get_current_active_user(self, current_user: User = None) -> User:
         """
         Get current active user.
         
