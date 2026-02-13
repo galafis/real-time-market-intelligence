@@ -1,467 +1,221 @@
-# 📈 Real Time Market Intelligence
+# Real-Time Market Intelligence
 
-> Advanced data science project: real-time-market-intelligence
+Plataforma de inteligência de mercado em tempo real com API REST, análise de sentimento NLP e previsão de séries temporais.
 
-[![Python](https://img.shields.io/badge/Python-3.12-3776AB.svg)](https://img.shields.io/badge/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688.svg)](https://img.shields.io/badge/)
-[![Gin](https://img.shields.io/badge/Gin-1.9-00ADD8.svg)](https://img.shields.io/badge/)
-[![NumPy](https://img.shields.io/badge/NumPy-1.26-013243.svg)](https://img.shields.io/badge/)
-[![Pandas](https://img.shields.io/badge/Pandas-2.2-150458.svg)](https://img.shields.io/badge/)
-[![Prometheus](https://img.shields.io/badge/Prometheus-2.48-E6522C.svg)](https://img.shields.io/badge/)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg)](https://img.shields.io/badge/)
-[![scikit--learn](https://img.shields.io/badge/scikit--learn-1.4-F7931E.svg)](https://img.shields.io/badge/)
-[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.15-FF6F00.svg)](https://img.shields.io/badge/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+## Visão Geral
 
-[English](#english) | [Português](#português)
+Este projeto reúne módulos Python para coleta, análise e visualização de dados de mercado financeiro:
 
----
+- **API REST (FastAPI)** — endpoints autenticados (JWT/OAuth2) para dados de mercado, sentimento e previsões. Quando nenhum provedor de dados externo está configurado, retorna dados mock para demonstração.
+- **Análise de Sentimento** — pipeline NLP com VADER (léxico), FinBERT (transformer) e ensemble ponderado para textos financeiros.
+- **Previsão de Séries Temporais** — modelos LSTM (TensorFlow/Keras) e Prophet para previsão de preços.
+- **Streaming Kafka** — produtor e consumidor usando `confluent-kafka` para ingestão de dados em tempo real.
+- **Dashboard Plotly Dash** — painel interativo para visualização de preços, sentimento e previsões.
+- **Cliente Python** — biblioteca cliente com suporte a REST e WebSocket para integração.
 
-## English
+## Estrutura do Projeto
 
-### 🎯 Overview
+```
+src/
+├── api/
+│   └── market_api.py          # API FastAPI com autenticação JWT
+├── models/
+│   ├── sentiment_analyzer.py  # VADER + FinBERT + ensemble
+│   └── time_series_forecaster.py  # LSTM + Prophet
+├── streaming/
+│   ├── kafka_consumer.py      # Consumidor confluent-kafka
+│   └── kafka_producer.py      # Produtor confluent-kafka
+├── visualization/
+│   └── dashboard.py           # Dashboard Plotly Dash
+├── scripts/
+│   └── initialize_db.py       # Esquema ClickHouse
+├── utils/
+│   └── logger.py              # Utilitário de logging
+└── client.py                  # Cliente REST + WebSocket
 
-**Real Time Market Intelligence** is a production-grade Python application complemented by HTML that showcases modern software engineering practices including clean architecture, comprehensive testing, containerized deployment, and CI/CD readiness.
+tests/
+└── test_main.py               # Testes funcionais (logger, API, auth, modelos)
 
-The codebase comprises **5,139 lines** of source code organized across **11 modules**, following industry best practices for maintainability, scalability, and code quality.
-
-### ✨ Key Features
-
-- **📈 Strategy Engine**: Multiple trading strategy implementations with configurable parameters
-- **🔄 Backtesting Framework**: Historical data simulation with realistic market conditions
-- **📊 Performance Analytics**: Sharpe ratio, Sortino ratio, maximum drawdown, and more
-- **⚡ Real-time Processing**: Low-latency data processing optimized for market speed
-- **⚡ Async API**: High-performance async REST API with FastAPI
-- **📖 Auto-Documentation**: Interactive Swagger UI and ReDoc
-- **✅ Validation**: Pydantic-powered request/response validation
-- **🏗️ Object-Oriented**: 17 core classes with clean architecture
-
-### 🏗️ Architecture
-
-```mermaid
-graph TB
-    subgraph Client["🖥️ Client Layer"]
-        A[REST API Client]
-        B[Swagger UI]
-    end
-    
-    subgraph API["⚡ API Layer"]
-        C[Authentication & Rate Limiting]
-        D[Request Validation]
-        E[API Endpoints]
-    end
-    
-    subgraph ML["🤖 ML Engine"]
-        F[Feature Engineering]
-        G[Model Training]
-        H[Prediction Service]
-        I[Model Registry]
-    end
-    
-    subgraph Data["💾 Data Layer"]
-        J[(Database)]
-        K[Cache Layer]
-        L[Data Pipeline]
-    end
-    
-    A --> C
-    B --> C
-    C --> D --> E
-    E --> H
-    E --> J
-    H --> F --> G
-    G --> I
-    I --> H
-    E --> K
-    L --> J
-    
-    style Client fill:#e1f5fe
-    style API fill:#f3e5f5
-    style ML fill:#e8f5e9
-    style Data fill:#fff3e0
+notebooks/
+├── prototypes/
+│   └── sentiment-prototype.ipynb  # Protótipo de análise de sentimento
+└── tutorials/
+    └── api-client-usage.ipynb     # Tutorial de uso do cliente
 ```
 
-```mermaid
-classDiagram
-    class User
-    class MarketData
-    class TimeSeriesForecaster
-    class KafkaConsumerManager
-    class KafkaProducerManager
-    class MarketDashboard
-    class TokenData
-    class UserInDB
-    class SocialPost
-    class MarketDataProducer
-    KafkaConsumerManager --> User : uses
-    KafkaConsumerManager --> MarketData : uses
-    KafkaConsumerManager --> TimeSeriesForecaster : uses
-```
+## Pré-requisitos
 
-### 🚀 Quick Start
+- Python 3.10+
+- (Opcional) Docker + Docker Compose para serviços de infraestrutura
 
-#### Prerequisites
-
-- Python 3.12+
-- pip (Python package manager)
-
-#### Installation
+## Instalação
 
 ```bash
-# Clone the repository
-git clone https://github.com/galafis/real-time-market-intelligence.git
-cd real-time-market-intelligence
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-#### Running
+Para NLP com FinBERT, o download do modelo acontece automaticamente na primeira execução via Hugging Face `transformers`.
+
+## Uso
+
+### Iniciar a API
 
 ```bash
-# Run the application
-python src/main.py
+# Variáveis de ambiente (opcionais, têm defaults para dev)
+export JWT_SECRET_KEY="sua-chave-secreta"
+export ADMIN_PASSWORD="senha-admin"
+
+python -m uvicorn src.api.market_api:MarketAPI --factory --host 0.0.0.0 --port 8000
 ```
 
-### 🐳 Docker
+Ou diretamente:
+
+```python
+from src.api.market_api import MarketAPI
+
+api = MarketAPI(secret_key="sua-chave-secreta")
+api.run()
+```
+
+### Infraestrutura (Docker Compose)
+
+O `docker-compose.yml` fornece ClickHouse, Kafka (com Zookeeper) e Redis:
 
 ```bash
-# Start all services
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
-
-# Rebuild after changes
-docker-compose up -d --build
 ```
 
-### 📁 Project Structure
-
-```
-real-time-market-intelligence/
-├── docker/
-│   └── README.md
-├── docs/          # Documentation
-│   └── README.md
-├── frontend/
-│   └── README.md
-├── notebooks/
-│   ├── eda/
-│   ├── prototypes/
-│   ├── tutorials/
-│   │   └── tutorials/
-│   └── README.md
-├── src/          # Source code
-│   ├── api/           # API endpoints
-│   │   └── market_api.py
-│   ├── config/        # Configuration
-│   │   └── README.md
-│   ├── data/
-│   │   └── README.md
-│   ├── models/        # Data models
-│   │   ├── sentiment_analyzer.py
-│   │   └── time_series_forecaster.py
-│   ├── scripts/
-│   │   ├── README.md
-│   │   └── initialize_db.py
-│   ├── streaming/
-│   │   ├── kafka_consumer.py
-│   │   └── kafka_producer.py
-│   ├── utils/         # Utilities
-│   │   └── logger.py
-│   ├── visualization/
-│   │   └── dashboard.py
-│   ├── __init__.py
-│   └── client.py
-├── tests/         # Test suite
-│   ├── README.md
-│   ├── __init__.py
-│   └── test_main.py
-├── LICENSE
-├── README.md
-├── STRUCTURE_STATUS.md
-├── docker-compose.yml
-├── requirements-dev.txt
-└── requirements.txt
-```
-
-### 🛠️ Tech Stack
-
-| Technology | Description | Role |
-|------------|-------------|------|
-| **Python** | Core Language | Primary |
-| **FastAPI** | High-performance async web framework | Framework |
-| **Gin** | Go web framework | Framework |
-| **NumPy** | Numerical computing | Framework |
-| **Pandas** | Data manipulation library | Framework |
-| **Prometheus** | Monitoring & alerting | Framework |
-| **Redis** | In-memory data store | Framework |
-| **scikit-learn** | Machine learning library | Framework |
-| **TensorFlow** | Deep learning framework | Framework |
-| HTML | 1 files | Supporting |
-
-### 🚀 Deployment
-
-#### Cloud Deployment Options
-
-The application is containerized and ready for deployment on:
-
-| Platform | Service | Notes |
-|----------|---------|-------|
-| **AWS** | ECS, EKS, EC2 | Full container support |
-| **Google Cloud** | Cloud Run, GKE | Serverless option available |
-| **Azure** | Container Instances, AKS | Enterprise integration |
-| **DigitalOcean** | App Platform, Droplets | Cost-effective option |
+### Testes
 
 ```bash
-# Production build
-docker build -t real-time-market-intelligence:latest .
-
-# Tag for registry
-docker tag real-time-market-intelligence:latest registry.example.com/real-time-market-intelligence:latest
-
-# Push to registry
-docker push registry.example.com/real-time-market-intelligence:latest
+python -m pytest tests/ -v
 ```
 
-### 🤝 Contributing
+## Tecnologias
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+| Componente | Tecnologia |
+|---|---|
+| API | FastAPI, Pydantic v2, PyJWT |
+| NLP | VADER (NLTK), FinBERT (transformers + PyTorch) |
+| Previsão | LSTM (TensorFlow/Keras), Prophet |
+| Streaming | confluent-kafka |
+| Banco de Dados | ClickHouse |
+| Cache | Redis |
+| Visualização | Plotly, Dash |
+| Cliente | requests, websocket-client |
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+## Licença
 
-### 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### 👤 Author
-
-**Gabriel Demetrios Lafis**
-- GitHub: [@galafis](https://github.com/galafis)
-- LinkedIn: [Gabriel Demetrios Lafis](https://linkedin.com/in/gabriel-demetrios-lafis)
+MIT
 
 ---
 
-## Português
+# Real-Time Market Intelligence
 
-### 🎯 Visão Geral
+Real-time market intelligence platform with REST API, NLP sentiment analysis, and time series forecasting.
 
-**Real Time Market Intelligence** é uma aplicação Python de nível profissional, complementada por HTML que demonstra práticas modernas de engenharia de software, incluindo arquitetura limpa, testes abrangentes, implantação containerizada e prontidão para CI/CD.
+## Overview
 
-A base de código compreende **5,139 linhas** de código-fonte organizadas em **11 módulos**, seguindo as melhores práticas do setor para manutenibilidade, escalabilidade e qualidade de código.
+This project brings together Python modules for collecting, analyzing, and visualizing financial market data:
 
-### ✨ Funcionalidades Principais
+- **REST API (FastAPI)** — JWT/OAuth2-authenticated endpoints for market data, sentiment, and forecasts. Falls back to mock data for demonstration when no external data provider is configured.
+- **Sentiment Analysis** — NLP pipeline with VADER (lexicon), FinBERT (transformer), and weighted ensemble for financial texts.
+- **Time Series Forecasting** — LSTM (TensorFlow/Keras) and Prophet models for price prediction.
+- **Kafka Streaming** — producer and consumer using `confluent-kafka` for real-time data ingestion.
+- **Plotly Dash Dashboard** — interactive panel for price, sentiment, and forecast visualization.
+- **Python Client** — client library with REST and WebSocket support for integration.
 
-- **📈 Strategy Engine**: Multiple trading strategy implementations with configurable parameters
-- **🔄 Backtesting Framework**: Historical data simulation with realistic market conditions
-- **📊 Performance Analytics**: Sharpe ratio, Sortino ratio, maximum drawdown, and more
-- **⚡ Real-time Processing**: Low-latency data processing optimized for market speed
-- **⚡ Async API**: High-performance async REST API with FastAPI
-- **📖 Auto-Documentation**: Interactive Swagger UI and ReDoc
-- **✅ Validation**: Pydantic-powered request/response validation
-- **🏗️ Object-Oriented**: 17 core classes with clean architecture
+## Project Structure
 
-### 🏗️ Arquitetura
+```
+src/
+├── api/
+│   └── market_api.py          # FastAPI with JWT authentication
+├── models/
+│   ├── sentiment_analyzer.py  # VADER + FinBERT + ensemble
+│   └── time_series_forecaster.py  # LSTM + Prophet
+├── streaming/
+│   ├── kafka_consumer.py      # confluent-kafka consumer
+│   └── kafka_producer.py      # confluent-kafka producer
+├── visualization/
+│   └── dashboard.py           # Plotly Dash dashboard
+├── scripts/
+│   └── initialize_db.py       # ClickHouse schema setup
+├── utils/
+│   └── logger.py              # Logging utility
+└── client.py                  # REST + WebSocket client
 
-```mermaid
-graph TB
-    subgraph Client["🖥️ Client Layer"]
-        A[REST API Client]
-        B[Swagger UI]
-    end
-    
-    subgraph API["⚡ API Layer"]
-        C[Authentication & Rate Limiting]
-        D[Request Validation]
-        E[API Endpoints]
-    end
-    
-    subgraph ML["🤖 ML Engine"]
-        F[Feature Engineering]
-        G[Model Training]
-        H[Prediction Service]
-        I[Model Registry]
-    end
-    
-    subgraph Data["💾 Data Layer"]
-        J[(Database)]
-        K[Cache Layer]
-        L[Data Pipeline]
-    end
-    
-    A --> C
-    B --> C
-    C --> D --> E
-    E --> H
-    E --> J
-    H --> F --> G
-    G --> I
-    I --> H
-    E --> K
-    L --> J
-    
-    style Client fill:#e1f5fe
-    style API fill:#f3e5f5
-    style ML fill:#e8f5e9
-    style Data fill:#fff3e0
+tests/
+└── test_main.py               # Functional tests (logger, API, auth, models)
+
+notebooks/
+├── prototypes/
+│   └── sentiment-prototype.ipynb  # Sentiment analysis prototype
+└── tutorials/
+    └── api-client-usage.ipynb     # Client usage tutorial
 ```
 
-### 🚀 Início Rápido
+## Prerequisites
 
-#### Prerequisites
+- Python 3.10+
+- (Optional) Docker + Docker Compose for infrastructure services
 
-- Python 3.12+
-- pip (Python package manager)
-
-#### Installation
+## Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/galafis/real-time-market-intelligence.git
-cd real-time-market-intelligence
-
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-#### Running
+For NLP with FinBERT, the model downloads automatically on first run via Hugging Face `transformers`.
+
+## Usage
+
+### Start the API
 
 ```bash
-# Run the application
-python src/main.py
+# Environment variables (optional, have dev defaults)
+export JWT_SECRET_KEY="your-secret-key"
+export ADMIN_PASSWORD="admin-password"
+
+python -m uvicorn src.api.market_api:MarketAPI --factory --host 0.0.0.0 --port 8000
 ```
 
-### 🐳 Docker
+Or directly:
+
+```python
+from src.api.market_api import MarketAPI
+
+api = MarketAPI(secret_key="your-secret-key")
+api.run()
+```
+
+### Infrastructure (Docker Compose)
+
+The `docker-compose.yml` provides ClickHouse, Kafka (with Zookeeper), and Redis:
 
 ```bash
-# Start all services
 docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop all services
-docker-compose down
-
-# Rebuild after changes
-docker-compose up -d --build
 ```
 
-### 📁 Estrutura do Projeto
-
-```
-real-time-market-intelligence/
-├── docker/
-│   └── README.md
-├── docs/          # Documentation
-│   └── README.md
-├── frontend/
-│   └── README.md
-├── notebooks/
-│   ├── eda/
-│   ├── prototypes/
-│   ├── tutorials/
-│   │   └── tutorials/
-│   └── README.md
-├── src/          # Source code
-│   ├── api/           # API endpoints
-│   │   └── market_api.py
-│   ├── config/        # Configuration
-│   │   └── README.md
-│   ├── data/
-│   │   └── README.md
-│   ├── models/        # Data models
-│   │   ├── sentiment_analyzer.py
-│   │   └── time_series_forecaster.py
-│   ├── scripts/
-│   │   ├── README.md
-│   │   └── initialize_db.py
-│   ├── streaming/
-│   │   ├── kafka_consumer.py
-│   │   └── kafka_producer.py
-│   ├── utils/         # Utilities
-│   │   └── logger.py
-│   ├── visualization/
-│   │   └── dashboard.py
-│   ├── __init__.py
-│   └── client.py
-├── tests/         # Test suite
-│   ├── README.md
-│   ├── __init__.py
-│   └── test_main.py
-├── LICENSE
-├── README.md
-├── STRUCTURE_STATUS.md
-├── docker-compose.yml
-├── requirements-dev.txt
-└── requirements.txt
-```
-
-### 🛠️ Stack Tecnológica
-
-| Tecnologia | Descrição | Papel |
-|------------|-----------|-------|
-| **Python** | Core Language | Primary |
-| **FastAPI** | High-performance async web framework | Framework |
-| **Gin** | Go web framework | Framework |
-| **NumPy** | Numerical computing | Framework |
-| **Pandas** | Data manipulation library | Framework |
-| **Prometheus** | Monitoring & alerting | Framework |
-| **Redis** | In-memory data store | Framework |
-| **scikit-learn** | Machine learning library | Framework |
-| **TensorFlow** | Deep learning framework | Framework |
-| HTML | 1 files | Supporting |
-
-### 🚀 Deployment
-
-#### Cloud Deployment Options
-
-The application is containerized and ready for deployment on:
-
-| Platform | Service | Notes |
-|----------|---------|-------|
-| **AWS** | ECS, EKS, EC2 | Full container support |
-| **Google Cloud** | Cloud Run, GKE | Serverless option available |
-| **Azure** | Container Instances, AKS | Enterprise integration |
-| **DigitalOcean** | App Platform, Droplets | Cost-effective option |
+### Tests
 
 ```bash
-# Production build
-docker build -t real-time-market-intelligence:latest .
-
-# Tag for registry
-docker tag real-time-market-intelligence:latest registry.example.com/real-time-market-intelligence:latest
-
-# Push to registry
-docker push registry.example.com/real-time-market-intelligence:latest
+python -m pytest tests/ -v
 ```
 
-### 🤝 Contribuindo
+## Technologies
 
-Contribuições são bem-vindas! Sinta-se à vontade para enviar um Pull Request.
+| Component | Technology |
+|---|---|
+| API | FastAPI, Pydantic v2, PyJWT |
+| NLP | VADER (NLTK), FinBERT (transformers + PyTorch) |
+| Forecasting | LSTM (TensorFlow/Keras), Prophet |
+| Streaming | confluent-kafka |
+| Database | ClickHouse |
+| Cache | Redis |
+| Visualization | Plotly, Dash |
+| Client | requests, websocket-client |
 
-### 📄 Licença
+## License
 
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-### 👤 Autor
-
-**Gabriel Demetrios Lafis**
-- GitHub: [@galafis](https://github.com/galafis)
-- LinkedIn: [Gabriel Demetrios Lafis](https://linkedin.com/in/gabriel-demetrios-lafis)
+MIT

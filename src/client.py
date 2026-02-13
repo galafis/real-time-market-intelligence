@@ -7,7 +7,6 @@ and price forecasting.
 Author: galafis
 """
 
-import asyncio
 import json
 from typing import List, Dict, Callable, Optional
 import websocket
