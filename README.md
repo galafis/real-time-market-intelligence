@@ -1,5 +1,15 @@
 # Real-Time Market Intelligence
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+
+</div>
+
+
 Plataforma de inteligência de mercado em tempo real com API REST, análise de sentimento NLP e previsão de séries temporais.
 
 ## Visão Geral
@@ -249,3 +259,32 @@ python -m pytest tests/ -v
 ## License
 
 MIT
+
+
+---
+
+## English
+
+### Overview
+
+Real-Time Market Intelligence - A project built with Python, Docker, FastAPI, developed by Gabriel Demetrios Lafis as part of professional portfolio and continuous learning in Data Science and Software Engineering.
+
+### Key Features
+
+This project demonstrates practical application of modern development concepts including clean code architecture, responsive design patterns, and industry-standard best practices. The implementation showcases real-world problem solving with production-ready code quality.
+
+### How to Run
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/galafis/real-time-market-intelligence.git
+   ```
+2. Follow the setup instructions in the Portuguese section above.
+
+### License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+Developed by [Gabriel Demetrios Lafis](https://github.com/galafis)
