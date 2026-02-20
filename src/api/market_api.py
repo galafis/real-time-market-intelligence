@@ -96,7 +96,7 @@ class MarketAPI:
         data_provider: Any = None,
         host: str = "0.0.0.0",
         port: int = 8000,
-        secret_key: str = "secret",
+        secret_key: str = None,
         algorithm: str = "HS256",
         access_token_expire_minutes: int = 30
     ):
@@ -115,8 +115,8 @@ class MarketAPI:
         self.host = host
         self.port = port
         
-        # Security settings
-        self.secret_key = os.environ.get("JWT_SECRET_KEY", secret_key)
+        # Security settings - JWT_SECRET_KEY deve ser definida em produção
+        self.secret_key = os.environ.get("JWT_SECRET_KEY", secret_key or "dev-only-not-for-production")
         self.algorithm = algorithm
         self.access_token_expire_minutes = access_token_expire_minutes
         
@@ -676,7 +676,7 @@ class MarketAPI:
 
 
 if __name__ == "__main__":
-    # Example usage
+    # Uso: defina JWT_SECRET_KEY nas variáveis de ambiente antes de iniciar
     api = MarketAPI(host="0.0.0.0", port=8000)
     api.run()
 
